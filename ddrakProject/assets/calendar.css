@@ -5,16 +5,11 @@
 @media (min-width:480px) and (max-width:519px){html{font-size:14px;}}
 @media (min-width:520px) and (max-width:559px){html{font-size:15px;}}
 @media (min-width:560px) {html{font-size:16px;}}
-    
+
 body {
     line-height: 1.2;
-    display: flex;
-    min-height: 100vh;
-    flex-direction: column;
     font-family: 'Spoqa Han Sans', 'Sans-serif' !important;
-}
-main {
-   flex: 1 0 auto;
+    overflow: hidden;
 }
 text {
     opacity: 1.0 !important;
@@ -24,7 +19,8 @@ span.c1 {
     font-size: 0.5rem;
 }
 span.c2 {
-    font-size: 2.2rem;
+    font-size: 2rem;
+    margin-left: 2px;
 }
 table {
     border-collapse: separate;
@@ -35,29 +31,62 @@ a:active {text-decoration:none;}
 a:hover {text-decoration:none; color:#fff;}
 
 #calendar {
-    margin: 40px auto;
-    /*max-width: 1400px;*/
-    margin-bottom: 20px;
+    margin: 3%;
+    height: 94%;
+    z-index: 0;
 }
 #calendar h2 {
     font-size: 1.8rem;
     line-height: 35px;
     margin-bottom: 20px;
+    margin-top: 5px;
 }
 
 #full-calendar {
     padding-top: 30px;
 }
+.fc-hiddenMenu-button {
+    margin-top: 1% !important;
+}
+.fc-icon-fa {
+    font-size: 1.5rem !important;
+    font-family: FontAwesome !important;
+}
 .fc-state-active,
 .fc-state-down {
     color: #e85660 !important;
 }
+.fc-event-container {
+    margin: 0 !important;
+}
 .fc-event {
-    opacity: 0.78;
+    opacity: 0.85;
     border: 0;
     font-size: 0.7rem;
     color: #fff;
+    border-radius: 2px;
+    margin: 0 !important;
 }
+.fc-time-grid-event {
+    right: 0 !important;
+}
+.fc-event .fc-content {
+    padding-left: 3%;
+    line-height: 14px;
+}
+.fc-short {
+    width: 100%;
+    left: 0 !important;
+    z-index: 5 !important;
+    height: fit-content;
+}
+.fc-short .fc-title {
+    line-height: 18px !important;
+}
+.fc-short .fc-time {
+    display: none !important;
+}
+
 .fc-past {
     color: #9e9e9e;
 }
@@ -65,21 +94,16 @@ a:hover {text-decoration:none; color:#fff;}
     font-weight: 100 !important;
     color: #e65660;
     /*color: #346cf2;*/
-    background: #f2f2f2;
+    background-color: #f2f2f2 !important;
 }
-.fc-unthemed td.fc-today {
-    background: #f2f2f2;
-}
-th.fc-day-header {
-    text-align: left;
-    padding-left: 10px;
-    font-weight: 80;
+
+.fc-day-header {
+    text-align: left !important;
+    padding-left: 10px !important;
+    font-weight: 300;
 }
 .fc-axis {
     width: 15px !important;
-}
-.fc-left {
-    margin-left: 20px;
 }
 
 .fc-unthemed th,
@@ -99,8 +123,48 @@ th.fc-day-header {
 .fc-unthemed .fc-list-heading td {
     background: #bbb;
 }
+.fc-toolbar h2 {
+    /* title */
+    line-height: 35px !important;
+    margin: 0 !important;
+    padding-left: 0.2em;
+}
 .fc button {
-    width: 3.2em;
-    height: 2.2em;
+    padding: 0 0.4em !important;
+    height: 2.5em !important;
+    width: 2.5em;
+    padding: 0 !important;
     background: #fff;
+    z-index: 1;
+    border: hidden;
+    border-radius: 100% !important;
+    box-shadow: 0 0 0 0;
+    -webkit-transition: background 0.2s, color 0.2s;
+    -moz-transition: background 0.2s, color 0.2s;
+    transition: background 0.2s, color 0.2s;
+}
+.fc button:hover {
+    background: #eeeeee;
+}
+.fc button:hover:before {
+    -webkit-animation: spinAround 2s linear infinite;
+    -moz-animation: spinAround 2s linear infinite;
+    animation: spinAround 2s linear infinite;
+}
+.fc button:focus,
+.fc-state-disabled:hover,
+.fc-state-active {
+    background-color: #fff !important;
+}
+
+.fc-time-grid .fc-slats td {
+    height: 1em !important;
+}
+.fc tr {
+    border-bottom-style: none !important;
+    border-bottom: 0 !important;
+    border-bottom-width: 0 !important;
+}
+.fc-minor td {
+    border: 0 !important;
 }

@@ -1,6 +1,6 @@
 {% extends "base_timetable.html" %}
 
-
+{% load custom_tags %}
 {% load i18n static %}
 
 {% block head_title %}{% trans "화요뜨락 시간표" %}{% endblock %}
@@ -8,75 +8,150 @@
 {% block tab_id %}id="home_tab"{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/js/materialize.min.js"></script>
 <link rel='stylesheet' type='text/css' href="{% static 'fullcalendar/dist/fullcalendar.css' %}" />
-<link rel='stylesheet' type='text/css' href="{% static 'calendar.css' %}" />
 <script type='text/javascript' src="{% static 'moment/moment.js' %}"></script>
 <script type='text/javascript' src="{% static 'fullcalendar/dist/fullcalendar.js' %}"></script>
-{% endblock %}
-
-{% block extra_list %}
-{% if user.username == '악의꽃' or user.username == '악의꽃admin' %}
-    <li><a href="/clubTimetable/"><i class="material-icons left">dashboard</i>악의꽃시간표</a></li>
-    {% elif user.username == '막무간애' or user.username == '막무간애admin' %}
-    <li><a href="/clubTimetable/"><i class="material-icons left">dashboard</i>막무간애시간표</a></li>
-    {% elif user.username == '모여락' or user.username == '모여락admin' %}
-    <li><a href="/clubTimetable/"><i class="material-icons left">dashboard</i>모여락시간표</a></li>
-    {% elif user.username == 'admin' %}
-    <li><a href="{% url 'admin:index' %}"><i class="material-icons left">build</i>관리자페이지</a></li>
-    <li><a href="{% url 'setTime' %}"><i class="material-icons left">schedule</i>시간설정</a></li>
-{% endif %}
+<script src="https://kit.fontawesome.com/990b446ac1.js" crossorigin="anonymous"></script>
 {% endblock %}
 
 {% block body %}
-<div id="calendar">
-
 <script type='text/javascript'>
 var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ? true : false;
+var titleForm = 'YYYY년 MMMM'
+var headerJSON = {
+    left: 'title',
+    center: '',
+    right: 'agendaWeek agendaFiveDay prev,next today',
+}
+if($(window).width() < 450) {
+    titleForm = 'MMMM'
+} 
+
+if($(window).width() <= 600) {
+    headerJSON = {
+        left: 'hiddenMenu title agendaWeek,agendaFiveDay,prev,next',
+        center: '',
+        right: ''
+    }
+}
+else if($(window).width() < 950) {
+    headerJSON = {
+        left: 'hiddenMenu title',
+        center: '',
+        right: 'agendaWeek agendaFiveDay prev,next',
+    }
+}
+    
 $(document).ready(function() {
     // page is now ready, initialize the calendar...
     $('#calendar').fullCalendar({
-        /* buttons */
-        header: {
-            left: 'title',
-            center: '',
-            right: 'agendaWeek,agendaFiveDay,agendaThreeDay prev,next today',
-        },
-        footer: {
-            right: 'prev,next',
-        },
+        header: headerJSON,
         views: {
             agendaFiveDay: {
                 type: 'agenda',
                 duration: { days: 5 },
             },
-            agendaThreeDay: {
-                type: 'agenda',
-                duration: { days: 3 },
-            },
         },
-        eventClick: function (calEvent) {
-            alert(calEvent.title + '\n시작: ' + calEvent.start.format('YYYY-MM-DD HH:mm:SS')
-            + '\n끝: ' + calEvent.end.format('YYYY-MM-DD HH:mm:SS'));
+        customButtons: {
+            hiddenMenu: {
+                icon: 'fa fas fa-bars',
+                click: function() {
+                    if($("input:checkbox[id='hiddeninput']").is(":checked")){
+                        $("input:checkbox[id='hiddeninput']").prop("checked", false);
+                    } else{
+                        $("input:checkbox[id='hiddeninput']").prop("checked", true);
+                    }
+                }
+            }
+        },
+        eventClick: function(calEvent){
+            var remove;
+            if(cur=='club'){
+                {% if user|has_group:'admins' %}
+                remove = confirm(calEvent.start.format('HH:mm')
+                    + ' ~ ' + calEvent.end.format('HH:mm')
+                    + '\n' + calEvent.title + '\n\n이 일정을 삭제하시겠습니까?');
+                if(remove) {
+                    var form = document.createElement("form");
+                    form.setAttribute("method", "Post");
+                    form.setAttribute("action", '/delete/');
+
+                    var hiddenField1 = document.createElement("input");
+                    hiddenField1.setAttribute("type", "hidden");
+                    hiddenField1.setAttribute("name", "title");
+                    hiddenField1.setAttribute("value", calEvent.title);
+                    var hiddenField2 = document.createElement("input");
+                    hiddenField2.setAttribute("type", "hidden");
+                    hiddenField2.setAttribute("name", "start");
+                    hiddenField2.setAttribute("value", calEvent.start.format('YYYY-MM-DD HH:mm:SS'));
+                    var hiddenField3 = document.createElement("input");
+                    hiddenField3.setAttribute("type", "hidden");
+                    hiddenField3.setAttribute("name", "end");
+                    hiddenField3.setAttribute("value", calEvent.end.format('YYYY-MM-DD HH:mm:SS'));
+                    var hiddenField4 = document.createElement("input");
+                    hiddenField4.setAttribute("type", "hidden");
+                    hiddenField4.setAttribute("name", 'csrfmiddlewaretoken');
+                    hiddenField4.setAttribute("value", "{% csrf_token %}");
+                    var hiddenField5 = document.createElement("input");
+                    hiddenField5.setAttribute("type", "hidden");
+                    hiddenField5.setAttribute("name", 'username');
+                    hiddenField5.setAttribute("value", '{{ user.username }}');
+
+                    form.appendChild(hiddenField1);
+                    form.appendChild(hiddenField2);
+                    form.appendChild(hiddenField3);
+                    form.appendChild(hiddenField4);
+                    form.appendChild(hiddenField5);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+                else {
+                    // alert("넌 잘하고이써 헷갈릴때면");
+                    return false;
+                }
+                {% else %}
+                    alert(calEvent.start.format('HH:mm')
+                    + ' ~ ' + calEvent.end.format('HH:mm')
+                    + '\n' + calEvent.title);
+                {% endif %}
+            } else {
+              alert(calEvent.start.format('HH:mm')
+                    + ' ~ ' + calEvent.end.format('HH:mm')
+                    + '\n' + calEvent.title);       
+            }
+        },
+        eventAfterRender: function(event, obj) {
+            var title = obj[0].firstElementChild.lastElementChild.offsetWidth;
+            var time = obj[0].firstElementChild.firstElementChild.firstElementChild.offsetWidth;
+            var width = obj[0].offsetWidth;
+            var goalWidth = title>time?title:time;
+            var parentWidth = obj[0].parentElement.offsetWidth;
+            
+            if(width < goalWidth) {
+                var left = parentWidth - goalWidth - 10;
+                left = left>0 ? left:0;
+                obj[0].style.left = String(left) + "px";
+            } 
         },
         /* Several options */
         defaultView: $(window).width() >= 818 ? 'agendaWeek':'agendaFiveDay',
         allDaySlot: false,
-        height: 'auto',
+        height: $(window).height()*0.90 < 915 ? $(window).height()*0.90 : 915,
         // nowIndicator: true,
         eventTextColor: 'rgba(255, 255, 255, 1)',
         // Time option; put 25~ to indicate next dawn
         minTime: "06:00:00",
         maxTime: "30:00:00",
         firstDay: 1,
-        titleFormat: 'YYYY년 MMMM',
+        titleFormat: titleForm,
         timeFormat: 'h(:m)',
         slotLabelFormat: 'h',
+        slotDuration: '00:30:00',
+        slotLabelInterval: '01:00:00',
         columnHeaderHtml: function(mom) {
             return '<span class="c1">' + mom.format('ddd') + '</span><br>' + '<span class="c2">' + mom.format('D') + '</span>';
         },
-
         /* Language : ko */
         monthNames: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
         monthNamesShort: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
@@ -94,9 +169,7 @@ $(document).ready(function() {
         /* EVENT SOURCE: MOST IMPORTANT */
         events: '/schedule/api/occurrences?calendar_slug=DEFAULT'
     })
-
 });
 </script>
-</div>
 
 {% endblock %}

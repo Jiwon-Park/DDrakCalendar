@@ -1,0 +1,280 @@
+{% load i18n static %}
+{% load custom_tags %}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" xml:lang="{{ LANGUAGE_CODE }}" lang="{{ LANGUAGE_CODE }}">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% if site_name %}{{ site_name }} : {% endif %}{% block head_title %}{% endblock %}</title>
+        <!-- tags for registering in search engines -->
+        <meta name="google-site-verification" content="HlZKvUc8Qm7SkekCJ2hKq-JFECF_c3hkOQMoXu7c58A" />
+        <meta name="naver-site-verification" content="a6c2c6ff93f6c3fba29b2d961893dd8ba2bb4854"/>
+        <!--                                        -->
+        <!--  font  -->
+        <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css' rel='stylesheet' type='text/css'>
+        <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-jp.css' rel='stylesheet' type='text/css'>
+        <link href="https://fonts.googleapis.com/css?family=Song+Myung&display=swap" rel="stylesheet">
+        <!--        -->
+        <link rel="stylesheet" href="{% static "bootstrap/dist/css/bootstrap.css" %}" type="text/css" media="screen">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt"crossorigin="anonymous">
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+            crossorigin="anonymous">
+        <link rel='stylesheet' type='text/css' href="{% static 'base.css' %}" />
+        <link rel='stylesheet' type='text/css' href="{% static 'calendar.css' %}" />
+        <script type="text/javascript" src="{% static "jquery/dist/jquery.js" %}"></script>
+        <script type="text/javascript" src="{% static "jquery-ui/jquery-ui.min.js" %}"></script>
+        <script type="text/javascript" src="{% static "bootstrap/dist/js/bootstrap.js" %}"></script>
+        <script type="text/javascript" src="{% static "schedule.js" %}"></script>
+        <link rel="stylesheet" href="{% static "schedule.css" %}" type="text/css" media="screen">
+        <link rel="stylesheet" href="{% static "jquery-ui/themes/base/all.css" %}" type="text/css" media="screen">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/js/materialize.min.js"></script>
+        <link rel="shortcut icon" href="{% static 'favicon.png' %}" type="image/x-icon">
+        {% block extra_head %}
+        {% endblock %}
+    </head>
+
+    <body>
+        <main>
+            <input type="checkbox" id="hiddeninput">
+            <input type="checkbox" id="hiddenmodal">
+            <div id="sidemenu">
+                <div class="user-menu">
+                    {% if user.is_active %}
+                        {% if user|has_group:"users" %}
+                            <h1>{{ user.username }}</h1>
+                        {% elif user|has_group:"admins" %}
+                            <h1>{{ user.username|handle_admin }}</h1><i class="material-icons flip">build</i>
+                        {% else %}
+                            <h1>관리자</h1><i class="material-icons flip">build</i>
+                        {% endif %}
+                    {% else %}
+                        <h1>어서오세요!</h1>
+                    {% endif %}
+                </div>
+                {% if user.is_active %}
+                    <div class="menu-idx1">
+                        {% if user|has_group:"users" or user|has_group:"admins" %}
+                        <div class="menu-btn" onclick="setClub()">
+                            <h2>
+                                {% if user|has_group:"users" %} 
+                                <i class="material-icons left">dashboard</i>{{ user.username }}시간표
+                                {% elif user|has_group:"admins" %}
+                                <i class="material-icons left">dashboard</i>{{ user.username|handle_admin }}시간표
+                                {% endif %}
+                            </h2>
+                        </div>
+                        <div class="menu-btn" onclick="setFull()">
+                            <h2>
+                                <i class="material-icons left">home</i>전체시간표
+                            </h2>
+                        </div>
+                        {% else %}
+                        <div class="menu-btn" onclick="location.href='{% url 'admin:index' %}'">
+                            <h2>
+                                <i class="material-icons left">build</i>관리자페이지
+                            </h2>
+                        </div>
+                        <div class="menu-btn" onclick="location.href='{% url 'setTime' %}'">
+                            <h2>
+                                <i class="material-icons left">schedule</i>시간설정
+                            </h2>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% if user|has_group:"admins" %}
+                    <div class="menu-idx2">
+                        <div class="menu-btn" onclick="location.href='{% url 'allnight' %}'">
+                            <h2>
+                                <i class="material-icons left">brightness_3</i>철야신청
+                            </h2>
+                        </div>
+                        <div class="menu-btn" onclick="location.href='{% url 'set_time_club' %}'">
+                            <h2>
+                                <i class="material-icons left">schedule</i>시간설정
+                            </h2>
+                        </div>
+                        <div class="menu-btn" onclick="location.href='{% url 'borrow' %}'">
+                            <h2>
+                                <i class="material-icons left">reply</i>대여등록
+                            </h2>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if user|has_group:"admins" %}
+                    <div class="menu-idx3">
+                    {% else %}
+                    <div class="menu-idx2">
+                    {% endif %}
+                        <div class="menu-btn" onclick="location.href='{% url 'logout' %}?next=/timetable'">
+                            <h2>
+                                <i class="material-icons left">exit_to_app</i>로그아웃
+                            </h2>
+                        </div>
+                        <br/>
+                        <div class="menu-btn" onclick="location.href='{% url 'change_password' %}'">
+                            <h2>
+                                <i class="material-icons left">vpn_key</i>비밀번호 변경
+                            </h2>
+                        </div>
+                        {% if user|has_group:"admins" %}
+                        <div class="menu-btn">
+                            <label for="hiddenmodal">
+                                    <i class="material-icons left">help_outline</i>도움말
+                            </label>
+                        </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                <div class="menu-idx1">
+                    <div class="menu-btn" onclick="location.href='{% url 'login' %}'">
+                        <h2>
+                            <i class="material-icons left">account_circle</i>로그인
+                        </h2>
+                    </div>
+                    <div class="menu-btn">
+                        <label for="hiddenmodal">
+                                <i class="material-icons left">help_outline</i>도움말
+                        </label>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-container">
+                <div class="modal-window">
+                    <div class="modal-article">
+                        <div id="modal-article-header">
+                            <h1>화요뜨락 시간표</h1>
+                        {% if not user.is_active %}
+                            <div id="borrow-req-btn" onClick='location.href="https://open.kakao.com/o/giy4qxJb"'>
+                                <i class="fas fa-comments"></i><span>대여 오픈카톡</span>
+                            </div>
+                        {% endif %}
+                            <label for="hiddenmodal"><i class="material-icons">close</i></label>
+                        </div>
+                        {% if not user.is_active %}
+                        <p>
+                            화요뜨락은 성균관대 자연과학캠퍼스 학생회관에 위치한 공연 및 합주시설입니다. 악의꽃, 막무간애, 모여락 동아리가 사용 및 관리하고 있으며, 공연 목적으로 대여가 가능합니다.
+                            대여는 대여 희망일로부터 2주 전까지 신청 가능하며, 관리 동아리 정기공연 일정과 중복될 경우 대여가 불가능합니다.
+                        </p>
+                        <h2>대여 시 대여료가 청구되나요?</h2>
+                        <p>
+                            화요뜨락은 학교 소유의 시설물로써, 공간 대여료를 동아리가 청구할 수 없습니다. 그러나 화요뜨락 내의 시설물 (앰프, 조명 등)들은 관리 동아리들의 소유로, 대여료를 청구할 수 있습니다.
+                        </p>
+                        
+                        {% else %}
+                        <p>
+                            화요뜨락 시간표 동아리별 관리자 계정입니다. 다음과 같은 작업을 수행할 수 있습니다.
+                            <br>
+                            1. 철야 등록<br>
+                            2. 시간 설정<br>
+                            3. 타 동아리 대여 등록<br>
+                            4. 등록한 일정 삭제
+                        </p>
+                        <h2>철야 등록</h2>
+                        <p>
+                            철야 등록은 선착순제입니다. 미리 합의된 날짜가 아니라면, 먼저 신청한 동아리가 철야를 사용할 수 있습니다.
+                            이미 철야가 등록되어있는 경우 등록이 불가능합니다.
+                        </p>
+                        <h2>시간 설정</h2>
+                        <p>
+                            동아리 내에서 팀 별로 시간을 등록할 수 있는 기능입니다. [전체 시간표]가 아닌 [동아리 시간표]에 등록되며,
+                            전체 시간표 및 타 동아리 시간표에 노출되지 않습니다.
+                        </p>
+                        <h3>
+                             동아리 내의 시간을 등록하는 경우, 이 기능을 사용할 것을 권장합니다.   
+                        </h3>
+                        <p>
+                            대여 기능으로 동아리별 시간을 등록하면 시간을 대여하기 위해 사이트에 들어온 사용자들이 혼란스러워할 수도 있으며, 타 동아리 시간표가 복잡해집니다.
+                        </p>
+                        <h2>타 동아리 대여 등록</h2>
+                        <p>
+                            타 동아리에게 시간을 대여해주는 기능입니다. 대여한 시간은 전체 시간표, 동아리 시간표에 모두 노출됩니다.
+                        </p>
+                        <h2>등록한 일정 삭제</h2>
+                        <p>
+                            [동아리 시간표]에서 일정을 클릭하면 해당 계정으로 등록한 일정에 한해 위 기능들로 등록한 일정을 삭제할 수 있습니다.
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                <label for="hiddenmodal"></label>
+            </div>
+            <label for="hiddeninput" id="background"></label>
+            <div id="calendar">
+                {% block body %} {% endblock %}
+                <div id="footer">
+                    © 2018-2019 JK Shin, Les Fleurs Du Mal
+                </div>
+            </div>
+            
+            <script>
+                var cur='DEFAULT';
+                /* dynamically set calendar options */
+                if(calendar) {
+                    $(window).resize(function() {
+                        var calHeight = $(window).height()*0.9;
+                        var height = calHeight < 915 ? calHeight : 915;
+                        var headerJSON;
+                        $('#calendar').fullCalendar('option', 'height', height);
+                        if($(window).width() <= 600) {
+                            headerJSON = {
+                                left: 'hiddenMenu title agendaWeek,agendaFiveDay,prev,next',
+                                center: '',
+                                right: '',
+                            };
+                            $('#calendar').fullCalendar('option', 'header', headerJSON);
+                        }
+                        else if($(window).width() < 950) {
+                            headerJSON = {
+                                left: 'hiddenMenu title',
+                                center: '',
+                                right: 'agendaWeek agendaFiveDay prev,next',
+                            };
+                            $('#calendar').fullCalendar('option', 'header', headerJSON);
+                        }
+                        else {
+                            headerJSON = {
+                                left: 'title',
+                                center: '',
+                                right: 'agendaWeek agendaFiveDay prev,next today',
+                            }
+                            $('#calendar').fullCalendar('option', 'header', headerJSON);
+                        }
+                        if($(window).width() < 450) {
+                            $('#calendar').fullCalendar('option', 'titleFormat', 'MMMM');
+                        }
+                    });
+                };
+                function setFull() {
+                    if(cur=='DEFAULT') {
+                        return;
+                    }
+                    {% if user.username == '악의꽃' or user.username == '악의꽃admin' %}
+                        $('#calendar').fullCalendar('removeEventSource', '/schedule/api/occurrences?calendar_slug=LFDM');
+                    {% elif user.username == '막무간애' or user.username == '막무간애admin' %}
+                        $('#calendar').fullCalendar('removeEventSource', '/schedule/api/occurrences?calendar_slug=MMGE');
+                    {% else %}
+                        $('#calendar').fullCalendar('removeEventSource', '/schedule/api/occurrences?calendar_slug=MYR');
+                    {% endif %}
+                    $('#calendar').fullCalendar('addEventSource', '/schedule/api/occurrences?calendar_slug=DEFAULT');
+                     cur = 'DEFAULT'
+                };
+                function setClub() {
+                    if(cur=='club') {
+                        return;
+                    }
+                    $('#calendar').fullCalendar('removeEventSource', '/schedule/api/occurrences?calendar_slug=DEFAULT');
+                    {% if user.username == '악의꽃' or user.username == '악의꽃admin' %}
+                        $('#calendar').fullCalendar('addEventSource', '/schedule/api/occurrences?calendar_slug=LFDM');
+                    {% elif user.username == '막무간애' or user.username == '막무간애admin' %}
+                        $('#calendar').fullCalendar('addEventSource', '/schedule/api/occurrences?calendar_slug=MMGE');
+                    {% else %}
+                        $('#calendar').fullCalendar('addEventSource', '/schedule/api/occurrences?calendar_slug=MYR');
+                    {% endif %}
+                    cur = 'club';
+                }
+            </script>
+        </main>
+</html>
